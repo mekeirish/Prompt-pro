@@ -1,7 +1,12 @@
 {
-    "short_name": "Prompts",
-    "name": "Prompts",
+    "short_name": "LB Code",
+    "name": "LB Code Snippets",
     "icons": [
+        {
+            "src": "icon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
         {
             "src": "icon.png",
             "sizes": "512x512",
@@ -11,6 +16,6 @@
     ],
     "start_url": "./index.html",
     "display": "standalone",
-    "theme_color": "#2f8f4f",
-    "background_color": "#2f8f4f"
+    "theme_color": "#232323",
+    "background_color": "#232323"
 }
