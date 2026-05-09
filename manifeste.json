@@ -1,0 +1,16 @@
+{
+    "short_name": "Prompts",
+    "name": "Prompts",
+    "icons": [
+        {
+            "src": "icon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "start_url": "./index.html",
+    "display": "standalone",
+    "theme_color": "#2f8f4f",
+    "background_color": "#2f8f4f"
+}
