@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LB Code</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#232323">
+    <link rel="apple-touch-icon" href="icon.png">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #232323;
+            background-image: linear-gradient(145deg, #2c2c2c, #1a1a1a);
+            color: #e0e0e0;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        #search-container { margin-bottom: 15px; }
+        #search-bar {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #444;
+            background: #1a1a1a;
+            color: #ffd43b;
+            box-sizing: border-box;
+            font-size: 1rem;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5);
+        }
+
+        #button-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .grid-row {
+            display: grid;
+            grid-template-columns: 35px 1fr 48px 48px;
+            gap: 8px;
+            align-items: center;
+            position: relative;
+            background: rgba(255,255,255,0.03);
+            padding: 10px;
+            border-radius: 14px;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5), inset -1px -1px 2px rgba(255,255,255,0.05);
+        }
+
+        button {
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            touch-action: manipulation;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 44px;
+            transition: all 0.1s ease;
+            box-shadow: 3px 3px 6px rgba(0,0,0,0.4), -1px -1px 4px rgba(255,255,255,0.05);
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:active {
+            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.6);
+            transform: translateY(1px);
+        }
+
+        .btn-color-trigger {
+            width: 28px !important; height: 28px !important;
+            border-radius: 50%; border: 2px solid #1a1a1a;
+            justify-self: center; box-shadow: inset 1px 1px 3px rgba(255,255,255,0.3), 2px 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .color-menu {
+            position: absolute; top: -55px; left: 0; background: #333;
+            padding: 8px; border-radius: 25px; display: none; gap: 10px;
+            z-index: 100; box-shadow: 6px 6px 12px rgba(0,0,0,0.6); border: 1px solid #444;
+        }
+
+        .color-option { width: 26px; height: 26px; border-radius: 50%; cursor: pointer; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.5); }
+
+        .btn-main { 
+            background: linear-gradient(145deg, #444, #333); color: white; 
+            padding: 0 12px; text-align: left; overflow: hidden; 
+            text-overflow: ellipsis; white-space: nowrap; justify-content: flex-start;
+            border: 1px solid #3d3d3d; font-size: 0.95rem;
+        }
+
+        .btn-new-slot { background: transparent; border: 2px dashed #444; color: #777; box-shadow: none; justify-content: center; }
+        .btn-copy { background: linear-gradient(145deg, #3776ab, #2e618d); color: white; }
+        .btn-delete { background: linear-gradient(145deg, #dc3545, #b02a37); color: white; font-size: 1.2rem; }
+
+        .confirm-box { display: flex; gap: 4px; width: 100%; height: 44px; }
+        .btn-yes { background: #28a745; color: white; flex: 1; font-size: 0.7rem; padding: 0; }
+        .btn-no { background: #555; color: white; flex: 1; font-size: 0.7rem; padding: 0; }
+
+        #editor {
+            background: #2a2a2a; padding: 20px; border-radius: 15px; display: none;
+            border: 1px solid #333; margin-bottom: 40px; box-shadow: 8px 8px 16px rgba(0,0,0,0.5);
+        }
+
+        input, textarea {
+            width: 100%; padding: 12px; margin-top: 8px; border-radius: 8px; border: none;
+            background: #1a1a1a; color: #00ff00; box-sizing: border-box; font-size: 1rem;
+            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.8); font-family: 'Courier New', Courier, monospace;
+        }
+        
+        .btn-update { 
+            background: linear-gradient(145deg, #28a745, #218838); color: white; 
+            width: 100%; margin-top: 20px; height: 50px; text-transform: uppercase;
+        }
+
+        .backup-zone { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
+        .btn-backup { background: #444; color: #aaa; font-size: 0.7rem; padding: 8px; height: auto; border: 1px solid #555; }
+
+        #toast {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            background: #3776ab; color: #fff; padding: 10px 25px; border-radius: 30px; display: none; z-index: 1000;
+        }
+
+        footer { margin-top: auto; text-align: center; font-size: 0.7rem; color: #555; padding: 20px 0; }
+        svg { fill: white; width: 18px; height: 18px; }
+        #pwaInstallBtn {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(145deg, #5a5821, #454319);
+            color: white; border: none; padding: 12px 24px; border-radius: 50px; display: none; z-index: 10000; font-weight: bold;
+        }
+    </style>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2f8f4f">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+    <h2 style="text-align: center; margin-top: 10px; color: #ffd43b; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">LB Code</h2>
+
+    <div id="search-container">
+        <input type="text" id="search-bar" placeholder="Rechercher un code..." oninput="filterButtons()">
+    </div>
+
+    <div id="button-list"></div>
+
+    <div id="editor">
+        <label style="font-size: 0.8rem; color: #bbb; margin-left: 5px;">Titre du bouton :</label>
+        <input type="text" id="input-title">
+        <br><br>
+        <label style="font-size: 0.8rem; color: #bbb; margin-left: 5px;">Texte à copier :</label>
+        <textarea id="input-content" rows="8"></textarea>
+        <div id="editor-actions">
+            <button class="btn-update" onclick="showUpdateConfirm()">Sauvegarder</button>
+        </div>
+    </div>
+
+    <div class="backup-zone">
+        <button class="btn-backup" onclick="exportData()">Exporter (Backup)</button>
+        <button class="btn-backup" onclick="document.getElementById('importFile').click()">Importer JSON</button>
+        <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+    </div>
+
+    <div id="toast">Copié !</div>
+    <button id="pwaInstallBtn">Installer l'application</button>
+    <footer>Made by Laiche Brahim 2026 Paris</footer>
+
+    <script>
+        const pythonPalette = ["#3776ab", "#ffd43b", "#a3be8c", "#ebcb8b", "#b48ead"];
+        let warehouseData = JSON.parse(localStorage.getItem('lb_code_data')) || [];
+        
+        if (warehouseData.length === 0) {
+            warehouseData = [{ id: Date.now().toString(), title: "Exemple", text: "print('Hello')", color: "#3776ab" }];
+            localStorage.setItem('lb_code_data', JSON.stringify(warehouseData));
+        }
+
+        let currentEditingId = null;
+
+        // Demander au navigateur de NE PAS supprimer les données
+        if (navigator.storage && navigator.storage.persist) {
+            navigator.storage.persist().then(granted => {
+                if (granted) console.log("Stockage Persistant Activé");
+            });
+        }
+
+        function saveData() {
+            localStorage.setItem('lb_code_data', JSON.stringify(warehouseData));
+            renderButtons();
+        }
+
+        function renderButtons() {
+            const container = document.getElementById('button-list');
+            container.innerHTML = '';
+            warehouseData.forEach((item) => {
+                container.appendChild(createRow(item, false));
+            });
+            container.appendChild(createRow({ id: 'new', title: "+ Ajouter un snippet", text: "", color: "#888", isNew: true }, true));
+        }
+
+        function createRow(item, isNewSlot) {
+            const row = document.createElement('div');
+            row.className = 'grid-row';
+
+            const colorMenu = document.createElement('div');
+            colorMenu.className = 'color-menu';
+            pythonPalette.forEach(c => {
+                const opt = document.createElement('div');
+                opt.className = 'color-option';
+                opt.style.backgroundColor = c;
+                opt.onclick = (e) => { e.stopPropagation(); item.color = c; saveData(); };
+                colorMenu.appendChild(opt);
+            });
+
+            const colorBtn = document.createElement('button');
+            colorBtn.className = 'btn-color-trigger';
+            colorBtn.style.backgroundColor = item.color;
+            if (!isNewSlot) {
+                colorBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    document.querySelectorAll('.color-menu').forEach(m => m.style.display = 'none');
+                    colorMenu.style.display = 'flex';
+                };
+            }
+
+            const btnMain = document.createElement('button');
+            btnMain.className = isNewSlot ? 'btn-main btn-new-slot' : 'btn-main';
+            btnMain.innerText = item.title;
+            btnMain.style.color = item.color;
+            btnMain.onclick = () => openEditor(item, isNewSlot ? 'new' : item.id);
+            
+            const btnCopy = document.createElement('button');
+            btnCopy.className = 'btn-copy';
+            btnCopy.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
+            btnCopy.onclick = () => isNewSlot ? null : copyToClipboard(item.text);
+            if(isNewSlot) btnCopy.style.opacity = '0.3';
+
+            const deleteContainer = document.createElement('div');
+            const btnDel = document.createElement('button');
+            btnDel.className = 'btn-delete';
+            btnDel.innerText = '×';
+            
+            if(isNewSlot) { btnDel.style.visibility = 'hidden'; } 
+            else {
+                btnDel.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteContainer.innerHTML = `
+                        <div class="confirm-box">
+                            <button class="btn-yes" onclick="confirmDelete('${item.id}')">OUI</button>
+                            <button class="btn-no" onclick="renderButtons()">×</button>
+                        </div>`;
+                };
+            }
+            deleteContainer.appendChild(btnDel);
+
+            row.appendChild(colorMenu);
+            row.appendChild(colorBtn);
+            row.appendChild(btnMain);
+            row.appendChild(btnCopy);
+            row.appendChild(deleteContainer);
+            
+            document.addEventListener('click', () => colorMenu.style.display = 'none');
+            return row;
+        }
+
+        window.openEditor = function(item, id) {
+            currentEditingId = id;
+            document.getElementById('editor').style.display = 'block';
+            resetEditorButtons();
+            document.getElementById('input-title').value = (id === 'new') ? "" : item.title;
+            document.getElementById('input-content').value = item.text;
+            setTimeout(() => {
+                document.getElementById('input-title').focus();
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }, 100);
+        }
+
+        window.resetEditorButtons = function() {
+            document.getElementById('editor-actions').innerHTML = `<button class="btn-update" onclick="showUpdateConfirm()">Sauvegarder</button>`;
+        }
+
+        window.showUpdateConfirm = function() {
+            document.getElementById('editor-actions').innerHTML = `
+                <div class="confirm-box" style="margin-top:20px;">
+                    <button class="btn-yes" style="height:50px; font-size:1rem;" onclick="processSave()">CONFIRMER</button>
+                    <button class="btn-no" style="height:50px; font-size:1rem;" onclick="resetEditorButtons()">ANNULER</button>
+                </div>`;
+        }
+
+        window.processSave = function() {
+            const title = document.getElementById('input-title').value || "Sans titre";
+            const text = document.getElementById('input-content').value || "";
+            if (currentEditingId === 'new') {
+                warehouseData.push({ id: Date.now().toString(), title: title, text: text, color: pythonPalette[0] });
+            } else {
+                const index = warehouseData.findIndex(d => d.id === currentEditingId);
+                if (index !== -1) { warehouseData[index].title = title; warehouseData[index].text = text; }
+            }
+            document.getElementById('editor').style.display = 'none';
+            saveData();
+            showToast("Sauvegardé !");
+        }
+
+        window.confirmDelete = function(id) {
+            warehouseData = warehouseData.filter(item => item.id !== id);
+            saveData();
+            showToast("Supprimé");
+        }
+
+        window.copyToClipboard = function(text) {
+            if (!text) { showToast("Vide !"); return; }
+            navigator.clipboard.writeText(text).then(() => showToast("Copié !"));
+        }
+
+        window.filterButtons = function() {
+            const term = document.getElementById('search-bar').value.toLowerCase();
+            const rows = document.querySelectorAll('.grid-row');
+            rows.forEach(row => {
+                const text = row.querySelector('.btn-main').innerText.toLowerCase();
+                if (row.querySelector('.btn-new-slot')) return; 
+                row.style.display = text.includes(term) ? 'grid' : 'none';
+            });
+        }
+
+        window.exportData = function() {
+            const dataStr = JSON.stringify(warehouseData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', 'lb_code_backup.json');
+            linkElement.click();
+        }
+
+        window.importData = function(event) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        warehouseData = imported;
+                        saveData();
+                        showToast("Importation réussie !");
+                    }
+                } catch (err) { alert("Erreur : fichier invalide."); }
+            };
+            reader.readAsText(event.target.files[0]);
+        }
+
+        window.showToast = function(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 1500);
+        }
+
+        renderButtons();
+
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); deferredPrompt = e;
+            document.getElementById('pwaInstallBtn').style.display = 'block';
+        });
+        document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt = null;
+                document.getElementById('pwaInstallBtn').style.display = 'none';
+            }
+        });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW OK'));
+            });
+        }
+    </script>
+
+    <style>
+        #pwaInstallBtn {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #2f8f4f; color: white; border: none; padding: 12px 24px;
+            border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: none; z-index: 10000; font-weight: bold; cursor: pointer;
+        }
+    </style>
+    <button id="pwaInstallBtn">Installer l'application</button>
+    <script>
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('pwaInstallBtn').style.display = 'block';
+        });
+        document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                document.getElementById('pwaInstallBtn').style.display = 'none';
+            }
+        });
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error:', err));
+            });
+        }
+    </script>
+</body>
+</html>
