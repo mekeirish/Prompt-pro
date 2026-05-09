@@ -134,11 +134,6 @@
             color: white; border: none; padding: 12px 24px; border-radius: 50px; display: none; z-index: 10000; font-weight: bold;
         }
     </style>
-
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2f8f4f">
-    <link rel="apple-touch-icon" href="icon.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
 </head>
 <body>
 
@@ -176,13 +171,12 @@
         let warehouseData = JSON.parse(localStorage.getItem('lb_code_data')) || [];
         
         if (warehouseData.length === 0) {
-            warehouseData = [{ id: Date.now().toString(), title: "Exemple", text: "print('Hello')", color: "#3776ab" }];
+            warehouseData = [{ id: Date.now().toString(), title: "Exemple", text: "print('Hello World')", color: "#3776ab" }];
             localStorage.setItem('lb_code_data', JSON.stringify(warehouseData));
         }
 
         let currentEditingId = null;
 
-        // Demander au navigateur de NE PAS supprimer les données
         if (navigator.storage && navigator.storage.persist) {
             navigator.storage.persist().then(granted => {
                 if (granted) console.log("Stockage Persistant Activé");
@@ -375,38 +369,7 @@
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW OK'));
-            });
-        }
-    </script>
-
-    <style>
-        #pwaInstallBtn {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: #2f8f4f; color: white; border: none; padding: 12px 24px;
-            border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            display: none; z-index: 10000; font-weight: bold; cursor: pointer;
-        }
-    </style>
-    <button id="pwaInstallBtn">Installer l'application</button>
-    <script>
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('pwaInstallBtn').style.display = 'block';
-        });
-        document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                deferredPrompt = null;
-                document.getElementById('pwaInstallBtn').style.display = 'none';
-            }
-        });
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error:', err));
+                navigator.serviceWorker.register('./sw.js').then(reg => console.log('Service Worker OK'));
             });
         }
     </script>
